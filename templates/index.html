@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#0d6efd">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>AI Помощник</title>
+  <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+  <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css" id="highlight-theme">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+</head>
+<body>
+  <div class="page-wrapper">
+    <header>
+      <h1><img src="{{ url_for('static', filename='logo.png') }}" alt="Логотип" class="header-logo"> AI Помощник</h1>
+      <div class="theme-switch">
+        <a href="#" class="theme-icon" id="theme-toggle" aria-label="Переключить тему">
+          <i class="bi bi-sun-fill" id="light-icon"></i>
+          <i class="bi bi-moon-fill" id="dark-icon" style="display: none;"></i>
+        </a>
+        <a href="#" class="theme-icon" id="reset-button" aria-label="Сбросить" title="Сбросить форму и ответ">
+          <i class="bi bi-arrow-repeat"></i>
+        </a>
+      </div>
+    </header>
+    
+    <div class="container">
+      <form id="questionForm" enctype="multipart/form-data">
+        <div class="form-group">
+          <textarea id="question" name="question" placeholder="Введите вопрос..." aria-label="Ваш вопрос" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+        </div>
+        
+        <div class="form-group form-row-flex">
+          <div class="url-flex input-group">
+            <i class="bi bi-link-45deg url-icon"></i>
+            <input type="url" id="docUrl" name="url" placeholder="URL документации" class="input-field">
+          </div>
+          <div class="file-flex">
+            <label for="docFile" class="file-label">
+              <i class="bi bi-file-earmark-text"></i> <span id="fileName" class="filename-text">Файл</span>
+            </label>
+            <input type="file" id="docFile" name="file" accept=".docx,.pdf,.txt" class="file-input">
+          </div>
+        </div>
+        
+        <div class="form-group processing-options">
+          <div class="processing-toggle">
+            <label class="switch">
+              <input type="checkbox" id="advancedProcessing">
+              <span class="slider round"></span>
+            </label>
+            <span class="toggle-label">Расширенная обработка</span>
+            <i class="bi bi-info-circle" id="infoTooltip" title="Расширенная обработка разбивает большие документы на части и использует векторный поиск для точных ответов"></i>
+          </div>
+          <select id="chunkSize" class="chunk-select" disabled>
+            <option value="1000">Маленькие части (1000 символов)</option>
+            <option value="2000" selected>Средние части (2000 символов)</option>
+            <option value="4000">Большие части (4000 символов)</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <button type="button" class="btn" id="askButton">
+            <i class="bi bi-send"></i> <span class="btn-text">Спросить</span>
+          </button>
+          <span class="keyboard-shortcut">Ctrl+Enter</span>
+        </div>
+      </form>
+      
+      <div id="answer" role="region" aria-live="polite"></div>
+      
+      <div class="examples-section">
+        <h3><i class="bi bi-lightbulb"></i> Частые вопросы:</h3>
+        <div class="examples-grid">
+          <a href="#" class="example-link" data-question="Какие форматы файлов поддерживает приложение?">
+            <i class="bi bi-file-earmark"></i> <span>Форматы</span>
+          </a>
+          <a href="#" class="example-link" data-question="Как работает расширенная обработка?">
+            <i class="bi bi-cpu"></i> <span>Обработка</span>
+          </a>
+          <a href="#" class="example-link" data-question="Как загрузить файл в приложение?">
+            <i class="bi bi-upload"></i> <span>Загрузка</span>
+          </a>
+          <a href="#" class="example-link" data-question="Какой размер чанка выбрать?">
+            <i class="bi bi-rulers"></i> <span>Чанки</span>
+          </a>
+          <a href="#" class="example-link" data-question="Как использовать URL для загрузки документа?">
+            <i class="bi bi-link"></i> <span>URL</span>
+          </a>
+          <a href="#" class="example-link" data-question="Какие ограничения имеет приложение?">
+            <i class="bi bi-exclamation-triangle"></i> <span>Ограничения</span>
+          </a>
+        </div>
+      </div>
+      
+      <footer>
+        <p class="tips">
+          <i class="bi bi-keyboard"></i> <kbd>Ctrl</kbd>+<kbd>Enter</kbd> для быстрой отправки
+        </p>
+        <p class="version">Версия 1.3 · <a href="https://github.com/yourusername/docker-ai-helper" target="_blank" rel="noopener">GitHub</a></p>
+      </footer>
+    </div>
+  </div>
+
+  <!-- Загружаем все скрипты в конце body -->
+  <script src="https://cdn.jsdelivr.net/npm/fastclick@1.0.6/lib/fastclick.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.0/marked.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <!-- Дополнительные языки для highlight.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/javascript.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/xml.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/dockerfile.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/yaml.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/json.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/css.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/sql.min.js"></script>
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

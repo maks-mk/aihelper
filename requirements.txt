@@ -1,0 +1,15 @@
+Flask
+python-docx
+google-generativeai
+gunicorn
+python-dotenv
+requests
+PyPDF2
+langchain
+langchain-text-splitters
+faiss-cpu
+nltk
+scikit-learn
+tiktoken
+sentence-transformers
+chromadb
