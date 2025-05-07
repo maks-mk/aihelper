@@ -748,6 +748,7 @@ function setupEventHandlers() {
   // Дополнительная настройка для тач-устройств
   if (IS_MOBILE) {
     setupMobileUI();
+    setupTouchTooltips();
   }
 }
 
@@ -837,4 +838,122 @@ function fixIOSInputs() {
       }, 10);
     }, { passive: false });
   });
+}
+
+// Функция для обработки подсказок на тач-устройствах
+function setupTouchTooltips() {
+  // Найти все элементы с атрибутом title
+  const elementsWithTooltips = document.querySelectorAll('[title]');
+  
+  elementsWithTooltips.forEach(element => {
+    // Сохраняем текст подсказки в data-атрибуте
+    const tooltipText = element.getAttribute('title');
+    element.setAttribute('data-tooltip', tooltipText);
+    
+    // Для тач-устройств лучше использовать touchstart/touchend для подсказок
+    element.addEventListener('touchstart', function(e) {
+      // Предотвращаем стандартное поведение тача только для подсказок
+      if (!this.classList.contains('example-link') && 
+          !this.classList.contains('theme-icon') && 
+          !this.id === 'askButton') {
+        e.preventDefault();
+      }
+      
+      // Добавляем класс для отображения подсказки
+      this.classList.add('tooltip-active');
+      
+      // Скрываем подсказку через 3 секунды
+      setTimeout(() => {
+        this.classList.remove('tooltip-active');
+      }, 3000);
+    }, { passive: false });
+    
+    // Скрываем подсказку при касании другого элемента
+    element.addEventListener('touchend', function() {
+      setTimeout(() => {
+        this.classList.remove('tooltip-active');
+      }, 500);
+    });
+  });
+  
+  // Добавляем стили для активных подсказок на тач-устройствах
+  addTouchTooltipStyles();
+}
+
+// Функция для добавления стилей подсказок на тач-устройствах
+function addTouchTooltipStyles() {
+  // Проверяем, есть ли уже элемент стиля
+  let styleElement = document.getElementById('touch-tooltip-styles');
+  
+  if (!styleElement) {
+    // Создаем новый элемент style
+    styleElement = document.createElement('style');
+    styleElement.id = 'touch-tooltip-styles';
+    
+    // Добавляем CSS для активной подсказки
+    styleElement.textContent = `
+      .tooltip-active::after {
+        content: attr(data-tooltip);
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 0.5rem;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        white-space: normal;
+        max-width: 200px;
+        z-index: 100;
+        margin-bottom: 5px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        text-align: center;
+      }
+      
+      .tooltip-active::before {
+        content: '';
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        border-width: 5px;
+        border-style: solid;
+        border-color: rgba(0, 0, 0, 0.8) transparent transparent transparent;
+        margin-bottom: -5px;
+        z-index: 101;
+      }
+      
+      @media (max-width: 576px) {
+        .tooltip-active::after {
+          white-space: normal;
+          width: auto;
+          max-width: 200px;
+          left: 0;
+          transform: none;
+          font-size: 0.75rem;
+        }
+        
+        .tooltip-active::before {
+          left: 10px;
+          transform: none;
+        }
+        
+        .theme-icon.tooltip-active::after {
+          right: 0;
+          left: auto;
+          transform: none;
+        }
+        
+        .theme-icon.tooltip-active::before {
+          right: 10px;
+          left: auto;
+          transform: none;
+        }
+      }
+    `;
+    
+    // Добавляем стили в head
+    document.head.appendChild(styleElement);
+  }
 }
